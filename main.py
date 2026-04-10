@@ -22,7 +22,6 @@ from agent.planner import Planner
 from agent.tools import ToolDispatcher
 from agent.validator import AgentFinalOutput
 
-
 BANNER = f"""
 {Colors.BOLD}{Colors.CYAN}
     ╔═══════════════════════════════════════════════════╗
@@ -75,7 +74,9 @@ def run_interactive(executor: AgentExecutor) -> None:
 
     while True:
         try:
-            user_input = input(f"\n{Colors.BOLD}{Colors.GREEN}  >>> {Colors.RESET}").strip()
+            user_input = input(
+                f"\n{Colors.BOLD}{Colors.GREEN}  >>> {Colors.RESET}"
+            ).strip()
         except (KeyboardInterrupt, EOFError):
             print(f"\n{Colors.DIM}  👋 Goodbye!{Colors.RESET}")
             break
@@ -118,8 +119,12 @@ def main() -> None:
     except ValueError as e:
         print(f"\n{Colors.RED}{Colors.BOLD}  ❌ Configuration Error:{Colors.RESET}")
         print(f"{Colors.RED}  {e}{Colors.RESET}")
-        print(f"\n{Colors.DIM}  💡 Create a .env file with: GOOGLE_API_KEY=your_key_here{Colors.RESET}")
-        print(f"{Colors.DIM}  💡 Or run: cp .env.example .env && edit .env{Colors.RESET}")
+        print(
+            f"\n{Colors.DIM}  💡 Create a .env file with: GOOGLE_API_KEY=your_key_here{Colors.RESET}"
+        )
+        print(
+            f"{Colors.DIM}  💡 Or run: cp .env.example .env && edit .env{Colors.RESET}"
+        )
         sys.exit(1)
 
     tools = ToolDispatcher(workspace_dir="scripts")

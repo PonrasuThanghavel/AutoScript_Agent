@@ -81,7 +81,9 @@ class ToolDispatcher:
             ValueError: If the path escapes the workspace directory.
         """
         # Strip any leading slashes or dots to prevent traversal
-        clean_name = Path(filename).name if "/" in filename or "\\" in filename else filename
+        clean_name = (
+            Path(filename).name if "/" in filename or "\\" in filename else filename
+        )
         resolved = (self.workspace_dir / clean_name).resolve()
 
         if not str(resolved).startswith(str(self.workspace_dir)):

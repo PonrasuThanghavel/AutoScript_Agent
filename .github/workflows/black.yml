@@ -1,10 +1,6 @@
-name: Check Black Formatting
+name: Code Quality & Security
 
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+on: [push, pull_request]
 
 jobs:
   black:
@@ -13,7 +9,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
@@ -23,3 +19,24 @@ jobs:
 
       - name: Run Black formatting check
         run: black --check .
+
+  security:
+    needs: black
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit
+
+      - name: Run Bandit vulnerability check
+        # This will recursively scan the directory for security vulnerabilities
+        run: bandit -r . -lll
