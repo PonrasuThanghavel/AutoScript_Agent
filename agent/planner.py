@@ -20,7 +20,6 @@ from google.genai.types import Content, Part
 
 from agent.validator import AgentResponse, clean_schema_for_gemini
 
-
 # System prompt that defines the agent's behavior
 SYSTEM_PROMPT = """\
 You are AutoScript Agent — an autonomous Python engineering assistant.
@@ -134,9 +133,7 @@ class Planner:
 
         # Build the new message
         if user_message is not None:
-            self.history.append(
-                Content(role="user", parts=[Part(text=user_message)])
-            )
+            self.history.append(Content(role="user", parts=[Part(text=user_message)]))
         elif tool_result is not None:
             # Feed the tool result back as a user message (observation)
             observation_text = f"[TOOL RESULT]\n{tool_result}"
@@ -151,9 +148,7 @@ class Planner:
         agent_response = AgentResponse.model_validate_json(response.text)
 
         # Add the assistant's response to history for multi-turn context
-        self.history.append(
-            Content(role="model", parts=[Part(text=response.text)])
-        )
+        self.history.append(Content(role="model", parts=[Part(text=response.text)]))
 
         return agent_response
 

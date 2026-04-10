@@ -127,7 +127,9 @@ class AgentExecutor:
             f"{Colors.RESET}"
         )
         if response.final_summary:
-            print(f"\n{Colors.GREEN}  📝 Summary: {response.final_summary}{Colors.RESET}")
+            print(
+                f"\n{Colors.GREEN}  📝 Summary: {response.final_summary}{Colors.RESET}"
+            )
 
     def run(self, user_request: str) -> AgentFinalOutput:
         """
@@ -149,7 +151,7 @@ class AgentExecutor:
                 f"\n  🚀 AutoScript Agent — Processing Request"
                 f"\n{'═' * 60}"
                 f"{Colors.RESET}"
-                f"\n{Colors.DIM}  \"{user_request}\"{Colors.RESET}"
+                f'\n{Colors.DIM}  "{user_request}"{Colors.RESET}'
             )
 
         last_tool_result: Optional[str] = None
@@ -163,7 +165,9 @@ class AgentExecutor:
                 if iteration == 1:
                     response = self.planner.get_next_action(user_message=user_request)
                 else:
-                    response = self.planner.get_next_action(tool_result=last_tool_result)
+                    response = self.planner.get_next_action(
+                        tool_result=last_tool_result
+                    )
 
                 self._print_thought(response)
 
@@ -220,7 +224,9 @@ class AgentExecutor:
                 )
 
             except Exception as e:
-                error_msg = f"❌ Error in step {iteration}: {type(e).__name__}: {str(e)}"
+                error_msg = (
+                    f"❌ Error in step {iteration}: {type(e).__name__}: {str(e)}"
+                )
                 if self.verbose:
                     print(f"\n{Colors.RED}  {error_msg}{Colors.RESET}")
 
