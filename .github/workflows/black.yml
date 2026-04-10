@@ -1,10 +1,6 @@
 name: Check Black Formatting
 
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+on: [push, pull_request]
 
 jobs:
   black:
@@ -13,7 +9,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
