@@ -148,7 +148,8 @@ class Planner:
         agent_response = AgentResponse.model_validate_json(response.text)
 
         # Add the assistant's response to history for multi-turn context
-        self.history.append(Content(role="model", parts=[Part(text=response.text)]))
+        tight_json = agent_response.model_dump_json(exclude_none=True)
+        self.history.append(Content(role="model", parts=[Part(text=tight_json)]))
 
         return agent_response
 
@@ -180,12 +181,28 @@ class Planner:
                     },
                 )
             except Exception as e:
-                error_str = str(e)
                 last_error = e
 
-                # Only retry on rate limit errors (429)
-                if "429" not in error_str and "RESOURCE_EXHAUSTED" not in error_str:
+                # We only retry on 429 API errors
+                if (
+                    not isinstance(
+                        e,
+                        getattr(
+                            genai,
+                            "errors",
+                            type("stub", (), {"APIError": type("none")}),
+                        ).APIError,
+                    )
+                    and "429" not in str(e)
+                    and "RESOURCE_EXHAUSTED" not in str(e)
+                ):
                     raise
+
+                is_api_error = hasattr(e, "code")
+                if is_api_error and e.code != 429:
+                    raise
+
+                error_str = str(e)
 
                 # Detect daily quota exhaustion — not retryable
                 if "PerDayPerProject" in error_str:
@@ -197,7 +214,22 @@ class Planner:
                     ) from e
 
                 # Parse retry delay from error message
-                wait_seconds = self._parse_retry_delay(error_str, fallback=15.0)
+                wait_seconds = 15.0
+                response_json = getattr(e, "response_json", None)
+                parsed_delay = False
+                if isinstance(response_json, dict):
+                    details = response_json.get("error", {}).get("details", [])
+                    for detail in details:
+                        if "retryDelay" in detail:
+                            try:
+                                delay_str = detail["retryDelay"].rstrip("s")
+                                wait_seconds = min(float(delay_str) + 1.0, 120.0)
+                                parsed_delay = True
+                                break
+                            except ValueError:
+                                pass
+                if not parsed_delay:
+                    wait_seconds = self._parse_retry_delay(error_str, fallback=15.0)
 
                 if attempt < self.max_retries:
                     print(

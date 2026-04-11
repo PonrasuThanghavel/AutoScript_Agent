@@ -62,7 +62,10 @@ class ToolDispatcher:
         if handler is None:
             raise ValueError(f"Unknown tool: {tool_name}")
 
-        return handler(**arguments)
+        try:
+            return handler(**arguments)
+        except TypeError as e:
+            return f"❌ Tool argument error: {str(e)}"
 
     def _resolve_path(self, filename: str) -> Path:
         """
@@ -80,13 +83,10 @@ class ToolDispatcher:
         Raises:
             ValueError: If the path escapes the workspace directory.
         """
-        # Strip any leading slashes or dots to prevent traversal
-        clean_name = (
-            Path(filename).name if "/" in filename or "\\" in filename else filename
-        )
+        clean_name = str(filename).lstrip("/\\")
         resolved = (self.workspace_dir / clean_name).resolve()
 
-        if not str(resolved).startswith(str(self.workspace_dir)):
+        if not resolved.is_relative_to(self.workspace_dir):
             raise ValueError(
                 f"Path traversal detected: '{filename}' resolves outside workspace."
             )
@@ -106,7 +106,8 @@ class ToolDispatcher:
         """
         filepath = self._resolve_path(filename)
         filepath.write_text(content, encoding="utf-8")
-        return f"✅ File written successfully: {filepath}"
+        rel_path = filepath.relative_to(self.workspace_dir)
+        return f"✅ File written successfully: {rel_path}"
 
     def _read_file(self, filename: str) -> str:
         """
@@ -121,10 +122,12 @@ class ToolDispatcher:
         filepath = self._resolve_path(filename)
 
         if not filepath.exists():
-            return f"❌ File not found: {filepath}"
+            rel_path = filepath.relative_to(self.workspace_dir)
+            return f"❌ File not found: {rel_path}"
 
         content = filepath.read_text(encoding="utf-8")
-        return f"📄 Contents of {filepath.name}:\n```python\n{content}\n```"
+        rel_path = filepath.relative_to(self.workspace_dir)
+        return f"📄 Contents of {rel_path}:\n{content}"
 
     def _execute_script(self, filename: str, timeout: int = 30) -> str:
         """
@@ -137,10 +140,14 @@ class ToolDispatcher:
         Returns:
             Formatted string with stdout, stderr, and exit code.
         """
+        if timeout is None:
+            timeout = 30
+
         filepath = self._resolve_path(filename)
 
         if not filepath.exists():
-            return f"❌ Script not found: {filepath}"
+            rel_path = filepath.relative_to(self.workspace_dir)
+            return f"❌ Script not found: {rel_path}"
 
         try:
             result = subprocess.run(
