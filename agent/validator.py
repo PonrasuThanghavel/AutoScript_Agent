@@ -97,7 +97,7 @@ class ToolArguments(BaseModel):
         default=None, description="The content to write to the file (for write_file)."
     )
     timeout: Optional[int] = Field(
-        default=None,
+        default=30,
         description="Timeout in seconds for script execution (for execute_script).",
     )
 

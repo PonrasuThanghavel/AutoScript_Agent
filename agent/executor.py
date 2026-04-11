@@ -185,8 +185,10 @@ class AgentExecutor:
                 if response.tool_call is None:
                     # LLM didn't provide a tool call but also isn't final — nudge it
                     last_tool_result = (
-                        "No tool was called. Please either call a tool to make progress, "
-                        "or set is_final=True if the task is complete."
+                        "Error: Missing tool call. You must either output a valid "
+                        "`tool_call` object with a supported tool name (e.g., 'write_file', "
+                        "'read_file', 'execute_script') OR set `is_final=True` if you "
+                        "have completed the user's request. Do not output empty tool calls."
                     )
                     continue
 
