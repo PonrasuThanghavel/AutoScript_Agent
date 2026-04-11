@@ -182,11 +182,22 @@ class Planner:
                 )
             except Exception as e:
                 last_error = e
-                
+
                 # We only retry on 429 API errors
-                if not isinstance(e, getattr(genai, "errors", type("stub", (), {"APIError": type("none")})).APIError) and "429" not in str(e) and "RESOURCE_EXHAUSTED" not in str(e):
+                if (
+                    not isinstance(
+                        e,
+                        getattr(
+                            genai,
+                            "errors",
+                            type("stub", (), {"APIError": type("none")}),
+                        ).APIError,
+                    )
+                    and "429" not in str(e)
+                    and "RESOURCE_EXHAUSTED" not in str(e)
+                ):
                     raise
-                
+
                 is_api_error = hasattr(e, "code")
                 if is_api_error and e.code != 429:
                     raise

@@ -142,7 +142,7 @@ class ToolDispatcher:
         """
         if timeout is None:
             timeout = 30
-            
+
         filepath = self._resolve_path(filename)
 
         if not filepath.exists():
